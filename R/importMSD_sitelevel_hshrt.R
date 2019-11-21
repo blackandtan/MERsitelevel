@@ -58,8 +58,8 @@
   datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q3_post-clean/"
   datapathout2 <- "//cdc.gov/locker/CGH_EHSRB/DataCatalog/MER/FY19Q3_post-clean/"
   
-  ##### ---------------------------------------------------------------------------------------
   
+  ##### ---------------------------------------------------------------------------------------
   
   
 
@@ -344,7 +344,7 @@
 
  
   
-  ### import FY19 data sets and save as .rds files -----
+  ### import FY19 data sets and save as .rds files ---------
   sld <- filenest %>%
     # filter(OU %in% c("Malawi", "Kenya", "Uganda")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
