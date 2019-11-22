@@ -385,6 +385,7 @@
     #   sldx_HRHSTAFF_disaggs
     # )
     
+    return(sldx_PlanB)
     gc()
   }
 
@@ -396,7 +397,7 @@
     mutate(data = purrr::map(data, importSiteLevelData))
 
   # save site level data set as .Rds
-  saveRDS(sld, file = paste0(datapathout, "Rdata/", OUx, "_FY19Q3_sitedata_JB.rds"))
+  saveRDS(sld, file = paste0(datapathout, "Rdata/", "MER_FY19Q3_sitedata_JB.rds"))
   
   # create site level data directories
   # create_site_directories <- function(dfx){
@@ -408,10 +409,10 @@
   # write txt file data 
   export4hshrt <- function(dfx){
     
-    OUx <- dfx$theOU
+    OUx <- dfx %>% pull(theOU)
     print(paste0("Exporting site data for ", OUx))
 
-    sldx <- readRDS(file = paste0(datapathout, "Rdata/", OUx, "_FY19Q3_sitedata.rds"))
+    sldx <- sld %>% filter(OU == OUx)
     # write_excel_csv2(sldx, path = paste0(datapathout,"site_level_data/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.txt"))
     write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.csv"))
     
