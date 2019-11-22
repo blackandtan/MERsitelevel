@@ -198,11 +198,24 @@
     
   }
   
-  calculate_TotalNum <- function(dfx){
+  filter_StdDisagg <- function(dfx){
     
-    dfx_TotalNum <- dfx %>%  
-      filter(standardizedDisaggregate == "Total Numerator") %>% 
-      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName, 
+    dfx2 <- dfx %>%
+      filter(standardizedDisaggregate %in% c("Total Numerator", "Total Denominator",
+                                             "CadreCategory", "CadreCategory/FinancialSupport", 
+                                             "CadreCategory/FinancialSupport/Expenditure", 
+                                             "CadreOU", "CadreOU/FinanceSupport", "CadreOU/FinancialSupport", 
+                                             "CadreOU/FinancialSupport/Expenditure",
+                                             "Grad Cadre")) 
+    return(dfx2)
+  }
+  
+  
+  calculate_TotalNum <- function(dfx){
+
+    dfx_TotalNum <- dfx %>%
+      filter(standardizedDisaggregate == "Total Numerator") %>%
+      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName,
                SNU1, SNU1Uid, PSNU, PSNUuid,
                FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
                orgUnitUID, SiteName,
@@ -219,17 +232,17 @@
                 Qtr2 = sum(Qtr2, na.rm = T),
                 Qtr3 = sum(Qtr3, na.rm = T),
                 Qtr4 = sum(Qtr4, na.rm = T),
-                Cumulative = sum(Cumulative, na.rm = T)) %>% 
-      ungroup() 
-    
+                Cumulative = sum(Cumulative, na.rm = T)) %>%
+      ungroup()
+
     return(dfx_TotalNum)
   }
-  
+
   calculate_TotalDenom <- function(dfx){
-    
-    dfx_TotalDenom <- dfx %>%  
-      filter(indicator == "TX_PVLS", standardizedDisaggregate == "Total Denominator") %>% 
-      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName, 
+
+    dfx_TotalDenom <- dfx %>%
+      filter(indicator == "TX_PVLS", standardizedDisaggregate == "Total Denominator") %>%
+      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName,
                SNU1, SNU1Uid, PSNU, PSNUuid,
                FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
                orgUnitUID, SiteName,
@@ -246,19 +259,19 @@
                 Qtr2 = sum(Qtr2, na.rm = T),
                 Qtr3 = sum(Qtr3, na.rm = T),
                 Qtr4 = sum(Qtr4, na.rm = T),
-                Cumulative = sum(Cumulative, na.rm = T)) %>% 
-      ungroup() 
-    
+                Cumulative = sum(Cumulative, na.rm = T)) %>%
+      ungroup()
+
     return(dfx_TotalDenom)
   }
-  
-  
+
+
   calculate_HRHCURR_disaggs <- function(dfx){
-    
+
     dfx_HRHCURR_disaggs <- dfx %>%
-      # filter(standardizedDisaggregate %in% c("CadreCategory/FinancialSupport", "CadreOU/FinancialSupport")) %>% 
-      filter(indicator == "HRH_CURR", standardizedDisaggregate != "Total Numerator") %>% 
-      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName, 
+      # filter(standardizedDisaggregate %in% c("CadreCategory/FinancialSupport", "CadreOU/FinancialSupport")) %>%
+      filter(indicator == "HRH_CURR", standardizedDisaggregate != "Total Numerator") %>%
+      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName,
                SNU1, SNU1Uid, PSNU, PSNUuid,
                FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
                orgUnitUID, SiteName,
@@ -275,16 +288,16 @@
                 Qtr2 = sum(Qtr2, na.rm = T),
                 Qtr3 = sum(Qtr3, na.rm = T),
                 Qtr4 = sum(Qtr4, na.rm = T),
-                Cumulative = sum(Cumulative, na.rm = T)) %>% 
-      ungroup() 
+                Cumulative = sum(Cumulative, na.rm = T)) %>%
+      ungroup()
     return(dfx_HRHCURR_disaggs)
   }
-    
+
   calculate_HRHSTAFF_disaggs <- function(dfx){
-    
+
     dfx_HRHCURR_disaggs <- dfx %>%
-      filter(indicator %in% c("HRH_STAFF", "HRH_STAFF_NAT"), standardizedDisaggregate != "Total Numerator") %>% 
-      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName, 
+      filter(indicator %in% c("HRH_STAFF", "HRH_STAFF_NAT"), standardizedDisaggregate != "Total Numerator") %>%
+      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName,
                SNU1, SNU1Uid, PSNU, PSNUuid,
                FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
                orgUnitUID, SiteName,
@@ -301,8 +314,8 @@
                 Qtr2 = sum(Qtr2, na.rm = T),
                 Qtr3 = sum(Qtr3, na.rm = T),
                 Qtr4 = sum(Qtr4, na.rm = T),
-                Cumulative = sum(Cumulative, na.rm = T)) %>% 
-      ungroup() 
+                Cumulative = sum(Cumulative, na.rm = T)) %>%
+      ungroup()
     return(dfx_HRHCURR_disaggs)
   }
   
@@ -358,21 +371,20 @@
       filter(indicator %in% targetindicators, 
              Fiscal_Year %in% targetyears)  
       
-    sldx_TotalNum <- calculate_TotalNum(sldx)
-    sldx_TotalDenom <- calculate_TotalDenom(sldx)
-    sldx_HRHCURR_disaggs <- calculate_HRHCURR_disaggs(sldx)
-    sldx_HRHSTAFF_disaggs <- calculate_HRHSTAFF_disaggs(sldx)
+    sldx_PlanB <- filter_StdDisagg(sldx)  # this version has all cols, per JB request
+    # sldx_TotalNum <- calculate_TotalNum(sldx)
+    # sldx_TotalDenom <- calculate_TotalDenom(sldx)
+    # sldx_HRHCURR_disaggs <- calculate_HRHCURR_disaggs(sldx)
+    # sldx_HRHSTAFF_disaggs <- calculate_HRHSTAFF_disaggs(sldx)
     
     # combine the SLDs
-    sldcombined <- bind_rows(
-      sldx_TotalNum,
-      sldx_TotalDenom,
-      sldx_HRHCURR_disaggs,
-      sldx_HRHSTAFF_disaggs
-    )
+    # sldcombined <- bind_rows(
+    #   sldx_TotalNum,
+    #   sldx_TotalDenom,
+    #   sldx_HRHCURR_disaggs,
+    #   sldx_HRHSTAFF_disaggs
+    # )
     
-    # save trimmed site level data set as .Rds
-    saveRDS(sldcombined, file = paste0(datapathout, "Rdata/", OUx, "_FY19Q3_sitedata.rds"))
     gc()
   }
 
@@ -383,13 +395,15 @@
     # filter(OU %in% c("Haiti")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
 
+  # save site level data set as .Rds
+  saveRDS(sld, file = paste0(datapathout, "Rdata/", OUx, "_FY19Q3_sitedata_JB.rds"))
   
   # create site level data directories
-  create_site_directories <- function(dfx){
-    OUx <- dfx$theOU
-    dir.create(paste0(datapathout, "site_level_data/", OUx))
-  }
-  purrr::map(filenest$data, create_site_directories)  # use once and then comment out as needed
+  # create_site_directories <- function(dfx){
+  #   OUx <- dfx$theOU
+  #   dir.create(paste0(datapathout, "site_level_data_JB/", OUx))
+  # }
+  # purrr::map(filenest$data, create_site_directories)  # use once and then comment out as needed
   
   # write txt file data 
   export4hshrt <- function(dfx){
@@ -399,7 +413,7 @@
 
     sldx <- readRDS(file = paste0(datapathout, "Rdata/", OUx, "_FY19Q3_sitedata.rds"))
     # write_excel_csv2(sldx, path = paste0(datapathout,"site_level_data/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.txt"))
-    write_excel_csv(sldx, path = paste0(datapathout,"site_level_data/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.csv"))
+    write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.csv"))
     
   }
 
