@@ -225,6 +225,34 @@
     return(dfx_TotalNum)
   }
   
+  calculate_TotalDenom <- function(dfx){
+    
+    dfx_TotalDenom <- dfx %>%  
+      filter(indicator == "TX_PVLS", standardizedDisaggregate == "Total Denominator") %>% 
+      group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName, 
+               SNU1, SNU1Uid, PSNU, PSNUuid,
+               FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
+               orgUnitUID, SiteName,
+               CommunityUID, Community, FacilityUID, Facility, SiteType,
+               Fiscal_Year, indicator) %>%
+      summarize(numeratorDenom = as.character(paste(unique(numeratorDenom), collapse=",")),
+                indicatorType = as.character(paste(unique(indicatorType), collapse=",")),
+                standardizedDisaggregate = as.character(paste(unique(standardizedDisaggregate), collapse=",")),
+                categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
+                Sex = as.character(paste(unique(Sex), collapse=",")),
+                modality = as.character(paste(unique(modality), collapse=",")),
+                TARGETS = sum(TARGETS, na.rm = T),
+                Qtr1 = sum(Qtr1, na.rm = T),
+                Qtr2 = sum(Qtr2, na.rm = T),
+                Qtr3 = sum(Qtr3, na.rm = T),
+                Qtr4 = sum(Qtr4, na.rm = T),
+                Cumulative = sum(Cumulative, na.rm = T)) %>% 
+      ungroup() 
+    
+    return(dfx_TotalDenom)
+  }
+  
+  
   calculate_HRHCURR_disaggs <- function(dfx){
     
     dfx_HRHCURR_disaggs <- dfx %>%
@@ -301,8 +329,12 @@
       "HRH_CURR_OtherCadre",
       "HRH_CURR_LayCadre",
       "HRH_CURR_Social_ServiceCadre" ,
+      "HRH_CURR_LaboratoryCadre" ,
+      "HRH_CURR_PharmacyCadre" ,
       "HRH_PRE",
       "TX_CURR",
+      "TX_CURR_NAT",
+      "TX_CURR_SUBNAT",
       "TX_ML",
       "TX_NEW",
       "TX_NET_NEW",
@@ -315,7 +347,7 @@
       "VMMC_CIRC"
     )
 
-    targetyears <- c("2018", "2019", "2020")
+    targetyears <- c("2019")
     
     # we just need totalnum for most variables ...
     # only a handful where disaggregate info needed
@@ -327,12 +359,14 @@
              Fiscal_Year %in% targetyears)  
       
     sldx_TotalNum <- calculate_TotalNum(sldx)
+    sldx_TotalDenom <- calculate_TotalDenom(sldx)
     sldx_HRHCURR_disaggs <- calculate_HRHCURR_disaggs(sldx)
     sldx_HRHSTAFF_disaggs <- calculate_HRHSTAFF_disaggs(sldx)
     
     # combine the SLDs
     sldcombined <- bind_rows(
       sldx_TotalNum,
+      sldx_TotalDenom,
       sldx_HRHCURR_disaggs,
       sldx_HRHSTAFF_disaggs
     )
@@ -346,7 +380,7 @@
   
   ### import FY19 data sets and save as .rds files ---------
   sld <- filenest %>%
-    # filter(OU %in% c("Malawi", "Kenya", "Uganda")) %>%  # test with a few OUs first before running the whole code
+    # filter(OU %in% c("Haiti")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
 
   
