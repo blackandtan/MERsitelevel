@@ -47,7 +47,7 @@
   
   # download all site level zip files from Panorama into this location:
   datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q3_post-clean/originaldata/sitelevel/"  # FY19Q3 post-cleaning
-  zip_path <- "\\\\cdc.gov\\locker\\CGH_EHSRB\\DataCatalog\\MER\\FY19Q3_post-clean\\originaldata\\sitelevel\\"
+  zip_path <- "\\\\cdc.gov\\locker\\CGH_EHSRB\\MERdata\\FY19Q3_post-clean\\originaldata\\sitelevel\\"
   
   # unzip files using this code -- only need to run once and then comment it out
       # thezipfiles <- data.frame(thefilepath = list.files(path = datapath1, pattern = ".zip", full.names = T),
@@ -56,13 +56,11 @@
   
   
   datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q3_post-clean/"
-  datapathout2 <- "//cdc.gov/locker/CGH_EHSRB/DataCatalog/MER/FY19Q3_post-clean/"
-  
+
   
   ##### ---------------------------------------------------------------------------------------
   
   
-
   
   # read directories
   thefileinfo <- data.frame(thefilepath = list.files(path = datapath_originals, pattern = ".txt",
@@ -172,44 +170,6 @@
     return(summSLD)
     
   }
-  
-  inventory_SLD_selected <- function(dfx){
-    
-    summSLD <- dfx %>% 
-      summarize(nrecords = length(orgUnitUID),
-                nSNU = length(unique(SNU1Uid)),
-                nPSNU = length(unique(PSNUuid)),
-                nFundingAgencies = length(unique(FundingAgency)),
-                nIP = length(unique(PrimePartner)),
-                nIM = length(unique(mech_code)),
-                nSites = length(unique(orgUnitUID)),
-                nCommunities = length(unique(CommunityUID)),
-                nFacilities = length(unique(FacilityUID))
-                # SNUlist = list(unique(SNU1Uid)),
-                # PSNUlist = list(unique(PSNUuid)),
-                # FundingAgencylist = list(unique(FundingAgency)),
-                # IPlist = list(unique(PrimePartner)),
-                # IMlist = list(unique(mech_code)),
-                # Sitelist = list(unique(orgUnitUID)),
-                # Commlist = list(unique(CommunityUID)),
-                # Faclist = list(unique(FacilityUID))
-                ) 
-    return(summSLD)
-    
-  }
-  
-  filter_StdDisagg <- function(dfx){
-    
-    dfx2 <- dfx %>%
-      filter(standardizedDisaggregate %in% c("Total Numerator", "Total Denominator",
-                                             "CadreCategory", "CadreCategory/FinancialSupport", 
-                                             "CadreCategory/FinancialSupport/Expenditure", 
-                                             "CadreOU", "CadreOU/FinanceSupport", "CadreOU/FinancialSupport", 
-                                             "CadreOU/FinancialSupport/Expenditure",
-                                             "Grad Cadre")) 
-    return(dfx2)
-  }
-  
   
   calculate_TotalNum <- function(dfx){
 
@@ -327,10 +287,13 @@
 
     sldx <- read_the_SLD(filepathx)
 
+    # use this sparingly - huge files that time to process and write!!
+    # write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata_UNFILTERED.csv"))
+    
+    
     targetindicators <- c(
       "HTS_TST", 
       "HTS_TST_POS",
-      "HTS_INDEX", "HTS_INDEX_COM", "HTS_INDEX_FAC",
       "HRH_CURR",
       "HRH_CURR_SiteLevel",
       "HRH_CURR_AboveSite",
@@ -352,15 +315,10 @@
       "TX_NEW",
       "TX_NET_NEW",
       "TX_PVLS",
-      "TX_RET",
-      "TX_RTT",
-      "KP_PREV",
-      "PP_PREV",
-      "OVC_SERV",
-      "VMMC_CIRC"
+      "TX_RET"
     )
 
-    targetyears <- c("2019")
+    targetyears <- c("2018", "2019")
     
     # we just need totalnum for most variables ...
     # only a handful where disaggregate info needed
@@ -371,56 +329,51 @@
       filter(indicator %in% targetindicators, 
              Fiscal_Year %in% targetyears)  
       
-    sldx_PlanB <- filter_StdDisagg(sldx)  # this version has all cols, per JB request
-    # sldx_TotalNum <- calculate_TotalNum(sldx)
-    # sldx_TotalDenom <- calculate_TotalDenom(sldx)
-    # sldx_HRHCURR_disaggs <- calculate_HRHCURR_disaggs(sldx)
-    # sldx_HRHSTAFF_disaggs <- calculate_HRHSTAFF_disaggs(sldx)
-    
+    sldx_TotalNum <- calculate_TotalNum(sldx)
+    sldx_TotalDenom <- calculate_TotalDenom(sldx)
+    sldx_HRHCURR_disaggs <- calculate_HRHCURR_disaggs(sldx)
+    sldx_HRHSTAFF_disaggs <- calculate_HRHSTAFF_disaggs(sldx)
+
     # combine the SLDs
-    # sldcombined <- bind_rows(
-    #   sldx_TotalNum,
-    #   sldx_TotalDenom,
-    #   sldx_HRHCURR_disaggs,
-    #   sldx_HRHSTAFF_disaggs
-    # )
+    sldcombined <- bind_rows(
+      sldx_TotalNum,
+      sldx_TotalDenom,
+      sldx_HRHCURR_disaggs,
+      sldx_HRHSTAFF_disaggs
+    )
     
-    return(sldx_PlanB)
-    gc()
+    return(sldcombined)
   }
 
  
   
+  
   ### import FY19 data sets and save as .rds files ---------
-  sld <- filenest %>%
+  sldnest <- filenest %>%
     # filter(OU %in% c("Haiti")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
-
-  # save site level data set as .Rds
-  saveRDS(sld, file = paste0(datapathout, "Rdata/", "MER_FY19Q3_sitedata_JB.rds"))
   
-  # create site level data directories
-  # create_site_directories <- function(dfx){
-  #   OUx <- dfx$theOU
-  #   dir.create(paste0(datapathout, "site_level_data_JB/", OUx))
-  # }
-  # purrr::map(filenest$data, create_site_directories)  # use once and then comment out as needed
+  glimpse(sldnest)
+  sld <- sldnest %>% unnest()
+  
+  # save R file
+  saveRDS(sldnest, file = paste0(datapathout, "Rdata/", "MER_FY19Q3_sitedata.rds"))
+  
+  
+  
   
   # write txt file data 
   export4hshrt <- function(dfx){
     
-    OUx <- dfx %>% pull(theOU)
+    OUx <- dfx %>% distinct(OperatingUnit) %>%  pull(OperatingUnit)
     print(paste0("Exporting site data for ", OUx))
 
-    sldx <- sld %>% filter(OU == OUx)
-    # write_excel_csv2(sldx, path = paste0(datapathout,"site_level_data/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.txt"))
-    write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata.csv"))
+    write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q3_siteleveldata_", Sys.Date(), ".csv"))
     
   }
 
-  purrr::map(filenest$data, export4hshrt)
+  purrr::map(sldnest$data, export4hshrt)
   
-  
-  
+ 
   
   
