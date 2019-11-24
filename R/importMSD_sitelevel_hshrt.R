@@ -340,12 +340,14 @@
       sldx_TotalDenom,
       sldx_HRHCURR_disaggs,
       sldx_HRHSTAFF_disaggs
-    )
+    ) %>% 
     
     return(sldcombined)
   }
 
  
+  
+  
   
   
   ### import FY19 data sets and save as .rds files ---------
@@ -362,17 +364,20 @@
   
   
   
-  # write txt file data 
+  # write csv file data 
   export4hshrt <- function(dfx){
     
     OUx <- dfx %>% distinct(OperatingUnit) %>%  pull(OperatingUnit)
     print(paste0("Exporting site data for ", OUx))
 
-    write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q3_siteleveldata_", Sys.Date(), ".csv"))
+    ifelse(is.na(OUx), 
+           print("no data"),
+           write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q3_siteleveldata_", Sys.Date(), ".csv"))
+    )
     
   }
 
-  purrr::map(sldnest$data, export4hshrt)
+  sldnest %>% purrr::map(sldnest$data, export4hshrt)
   
  
   
