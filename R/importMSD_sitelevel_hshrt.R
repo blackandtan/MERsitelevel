@@ -34,28 +34,15 @@
 
 ### IMPORT DATA -----------------------------------------------------------------
 
-  # Important note
-  # before running this script, you need to do 3 things manually
-  #  1. download all of the site level MER data zip files from Panorama and put them in the file folder indicated below
-  #  2. change the directory and filename references in the code block below to match the quarterly data of interest
-  #  3. activate the unzip code (lines 49-51) to unzip the files, then comment it out again - only need to run it once
   
   ##### change directories and filenames in this block as needed !!!  ---------------------------------------
   
-  # FY2019 Q3 post-clean v2_1
-  dsversion <- "MER_Structured_Datasets_Site_IM_FY17-19_20190920_v2_1_"
+  # file version
+  dsversion <- "MER_Structured_Datasets_SITE_IM_FY17-20_20191115_v1_1_"
   
   # download all site level zip files from Panorama into this location:
-  datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q3_post-clean/originaldata/sitelevel/"  # FY19Q3 post-cleaning
-  zip_path <- "\\\\cdc.gov\\locker\\CGH_EHSRB\\MERdata\\FY19Q3_post-clean\\originaldata\\sitelevel\\"
-  
-  # unzip files using this code -- only need to run once and then comment it out
-      # thezipfiles <- data.frame(thefilepath = list.files(path = datapath1, pattern = ".zip", full.names = T),
-      #                           stringsAsFactors = FALSE)
-      # unzip(zip_path, exdir = zip_path)
-  
-  
-  datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q3_post-clean/"
+  datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4_pre-clean/originaldata/sitelevel/"  # FY19Q4 pre-cleaning
+  datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4_pre-clean/"
 
   
   ##### ---------------------------------------------------------------------------------------
@@ -63,12 +50,12 @@
   
   
   # read directories
-  thefileinfo <- data.frame(thefilepath = list.files(path = datapath_originals, pattern = ".txt",
+  thefileinfo <- data.frame(thefilepath = list.files(path = datapath_originals, pattern = ".zip",
                                                      full.names = T),stringsAsFactors = FALSE)
   filenest <- thefileinfo %>%
     mutate(thefilename = basename(file.path(thefilepath)),
            theOU = str_replace(basename(file.path(thefilepath)), dsversion, ""),
-           theOU = str_replace(theOU, ".txt", ""),
+           theOU = str_replace(theOU, ".zip", ""),
            OU = theOU) %>% 
     nest(theOU, thefilepath)
   
@@ -77,68 +64,132 @@
   read_the_SLD <- function(filepathx){
     
     theSLD <- read_delim(file = filepathx,
-               delim = "\t",
-               col_names=T,
-               col_types = cols(
-                 orgUnitUID = col_character(),
-                 SiteName = col_character(),
-                 Region = col_character(),
-                 RegionUID = col_character(),
-                 OperatingUnit = col_character(),
-                 OperatingUnitUID = col_character(),
-                 CountryName = col_character(),
-                 SNU1 = col_character(),
-                 SNU1Uid = col_character(),
-                 PSNU = col_character(),
-                 PSNUuid = col_character(),
-                 SNUPrioritization = col_character(),
-                 typeMilitary = col_character(),
-                 DREAMS = col_character(),
-                 PrimePartner = col_character(),
-                 FundingAgency = col_character(),
-                 mech_code = col_character(),
-                 mech_name = col_character(),
-                 pre_rgnlztn_hq_mech_code = col_character(),
-                 prime_partner_duns = col_character(),
-                 award_number = col_character(),
-                 CommunityUID = col_character(),
-                 Community = col_character(),
-                 CommunityPrioritization = col_character(),
-                 FacilityUID = col_character(),
-                 Facility = col_character(),
-                 FacilityPrioritization = col_character(),
-                 SiteType = col_character(),
-                 indicator = col_character(),
-                 numeratorDenom = col_character(),
-                 indicatorType = col_character(),
-                 disaggregate = col_character(),
-                 standardizedDisaggregate = col_character(),
-                 categoryOptionComboName = col_character(),
-                 AgeAsEntered = col_character(),
-                 TrendsFine = col_character(),
-                 TrendsSemiFine = col_character(),
-                 TrendsCoarse = col_character(),
-                 Sex = col_character(),
-                 StatusHIV = col_character(),
-                 StatusTB = col_logical(),
-                 StatusCX = col_character(),
-                 hiv_treatment_status = col_logical(),
-                 population = col_character(),
-                 otherDisaggregate = col_character(),
-                 coarseDisaggregate = col_character(),
-                 modality = col_character(),
-                 Fiscal_Year = col_double(),
-                 TARGETS = col_double(),
-                 Qtr1 = col_double(),
-                 Qtr2 = col_double(),
-                 Qtr3 = col_double(),
-                 Qtr4 = col_double(),
-                 Cumulative = col_double()
-               ),
-               trim_ws = T,
-               progress = show_progress())
+                         delim = "\t",
+                         col_names= T,
+                         col_types = cols(
+                           orgunituid = col_character(),
+                           sitename = col_character(),
+                           region = col_character(),
+                           regionuid = col_character(),
+                           operatingunit = col_character(),
+                           operatingunituid = col_character(),
+                           countryname = col_character(),
+                           snu1 = col_character(),
+                           snu1uid = col_character(),
+                           psnu = col_character(),
+                           psnuuid = col_character(),
+                           snuprioritization = col_double(),
+                           typemilitary = col_character(),
+                           dreams = col_character(),
+                           primepartner = col_character(),
+                           fundingagency = col_character(),
+                           mech_code = col_double(),
+                           mech_name = col_character(),
+                           pre_rgnlztn_hq_mech_code = col_double(),
+                           prime_partner_duns = col_character(),
+                           award_number = col_character(),
+                           communityuid = col_character(),
+                           community = col_character(),
+                           communityprioritization = col_character(),
+                           facilityuid = col_character(),
+                           facility = col_character(),
+                           facilityprioritization = col_character(),
+                           sitetype = col_character(),
+                           indicator = col_character(),
+                           numeratordenom = col_character(),
+                           indicatortype = col_character(),
+                           disaggregate = col_character(),
+                           standardizeddisaggregate = col_character(),
+                           categoryoptioncomboname = col_character(),
+                           ageasentered = col_character(),
+                           trendsfine = col_character(),
+                           trendssemifine = col_character(),
+                           trendscoarse = col_character(),
+                           sex = col_character(),
+                           statushiv = col_character(),
+                           statustb = col_logical(),
+                           statuscx = col_logical(),
+                           hiv_treatment_status = col_logical(),
+                           population = col_logical(),
+                           otherdisaggregate = col_character(),
+                           coarsedisaggregate = col_character(),
+                           modality = col_character(),
+                           fiscal_year = col_double(),
+                           targets = col_double(),
+                           qtr1 = col_double(),
+                           qtr2 = col_double(),
+                           qtr3 = col_double(),
+                           qtr4 = col_double(),
+                           cumulative = col_double()
+                         ),
+                         trim_ws = T,
+                         progress = show_progress())
     # spec(theSLD)
     # problems(theSLD)
+    
+    # for Q4, names are all lower case ... unlike Q4
+    # map over to old names for code, then change to lower case at the end for use ....
+    MERFY19Q4names <- colnames(theSLD)
+    save(MERFY19Q4names, file = "//cdc.gov/locker/CGH_EHSRB/DataCatalog/Rdata/MERFY19Q4names")
+    
+    Q3names <-   c(
+      "orgUnitUID" ,
+      "SiteName" ,
+      "Region" ,
+      "RegionUID" ,
+      "OperatingUnit" ,
+      "OperatingUnitUID" ,
+      "CountryName" ,
+      "SNU1" ,
+      "SNU1Uid" ,
+      "PSNU" ,
+      "PSNUuid" ,
+      "SNUPrioritization" ,
+      "typeMilitary" ,
+      "DREAMS" ,
+      "PrimePartner" ,
+      "FundingAgency" ,
+      "mech_code" ,
+      "mech_name" ,
+      "pre_rgnlztn_hq_mech_code",
+      "prime_partner_duns" ,
+      "award_number" ,
+      "CommunityUID" ,
+      "Community" ,
+      "CommunityPrioritization" ,
+      "FacilityUID" ,
+      "Facility" ,
+      "FacilityPrioritization" ,
+      "SiteType" ,
+      "indicator" ,
+      "numeratorDenom" ,
+      "indicatorType" ,
+      "disaggregate" ,
+      "standardizedDisaggregate" ,
+      "categoryOptionComboName" ,
+      "AgeAsEntered" ,
+      "TrendsFine" ,
+      "TrendsSemiFine" ,
+      "TrendsCoarse" ,
+      "Sex" ,
+      "StatusHIV" ,
+      "StatusTB" ,
+      "StatusCX" ,
+      "hiv_treatment_status" ,
+      "population" ,
+      "otherDisaggregate" ,
+      "coarseDisaggregate" ,
+      "modality" ,
+      "Fiscal_Year" ,
+      "TARGETS" ,
+      "Qtr1" ,
+      "Qtr2" ,
+      "Qtr3" ,
+      "Qtr4" ,
+      "Cumulative"
+    )   
+    colnames(theSLD) <- Q3names
+    
     return(theSLD)
   }
   
@@ -187,6 +238,28 @@
                 categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
                 Sex = as.character(paste(unique(Sex), collapse=",")),
                 modality = as.character(paste(unique(modality), collapse=",")),
+                
+                SNUPrioritization = as.character(paste(unique(  SNUPrioritization ), collapse=",")),    # not needed
+                typeMilitary = as.character(paste(unique(  typeMilitary ), collapse=",")),    # not needed
+                DREAMS = as.character(paste(unique(  DREAMS ), collapse=",")),    # not needed
+                pre_rgnlztn_hq_mech_code = as.character(paste(unique(  pre_rgnlztn_hq_mech_code ), collapse=",")),    # not needed
+                award_number = as.character(paste(unique(  award_number ), collapse=",")),    # not needed
+                CommunityPrioritization = as.character(paste(unique(  CommunityPrioritization ), collapse=",")),    # not needed
+                FacilityPrioritization = as.character(paste(unique(  FacilityPrioritization ), collapse=",")),    # not needed
+                disaggregate = as.character(paste(unique(  disaggregate ), collapse=",")),    # not needed
+                AgeAsEntered = as.character(paste(unique(  AgeAsEntered ), collapse=",")),    # not needed
+                TrendsFine = as.character(paste(unique(  TrendsFine ), collapse=",")),    # not needed
+                TrendsSemiFine = as.character(paste(unique(  TrendsSemiFine ), collapse=",")),    # not needed
+                TrendsCoarse = as.character(paste(unique(  TrendsCoarse ), collapse=",")),    # not needed
+                StatusHIV = as.character(paste(unique(  StatusHIV ), collapse=",")),    # not needed
+                StatusTB = as.character(paste(unique(  StatusTB ), collapse=",")),    # not needed
+                StatusCX = as.character(paste(unique(  StatusCX ), collapse=",")),    # not needed
+                hiv_treatment_status = as.character(paste(unique(  hiv_treatment_status ), collapse=",")),    # not needed
+                population = as.character(paste(unique(  population ), collapse=",")),    # not needed
+                otherDisaggregate = as.character(paste(unique(  otherDisaggregate ), collapse=",")),    # not needed
+                coarseDisaggregate = as.character(paste(unique(  coarseDisaggregate ), collapse=",")),    # not needed
+                
+                
                 TARGETS = sum(TARGETS, na.rm = T),
                 Qtr1 = sum(Qtr1, na.rm = T),
                 Qtr2 = sum(Qtr2, na.rm = T),
@@ -214,6 +287,27 @@
                 categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
                 Sex = as.character(paste(unique(Sex), collapse=",")),
                 modality = as.character(paste(unique(modality), collapse=",")),
+                
+                SNUPrioritization = as.character(paste(unique(  SNUPrioritization ), collapse=",")),    # not needed
+                typeMilitary = as.character(paste(unique(  typeMilitary ), collapse=",")),    # not needed
+                DREAMS = as.character(paste(unique(  DREAMS ), collapse=",")),    # not needed
+                pre_rgnlztn_hq_mech_code = as.character(paste(unique(  pre_rgnlztn_hq_mech_code ), collapse=",")),    # not needed
+                award_number = as.character(paste(unique(  award_number ), collapse=",")),    # not needed
+                CommunityPrioritization = as.character(paste(unique(  CommunityPrioritization ), collapse=",")),    # not needed
+                FacilityPrioritization = as.character(paste(unique(  FacilityPrioritization ), collapse=",")),    # not needed
+                disaggregate = as.character(paste(unique(  disaggregate ), collapse=",")),    # not needed
+                AgeAsEntered = as.character(paste(unique(  AgeAsEntered ), collapse=",")),    # not needed
+                TrendsFine = as.character(paste(unique(  TrendsFine ), collapse=",")),    # not needed
+                TrendsSemiFine = as.character(paste(unique(  TrendsSemiFine ), collapse=",")),    # not needed
+                TrendsCoarse = as.character(paste(unique(  TrendsCoarse ), collapse=",")),    # not needed
+                StatusHIV = as.character(paste(unique(  StatusHIV ), collapse=",")),    # not needed
+                StatusTB = as.character(paste(unique(  StatusTB ), collapse=",")),    # not needed
+                StatusCX = as.character(paste(unique(  StatusCX ), collapse=",")),    # not needed
+                hiv_treatment_status = as.character(paste(unique(  hiv_treatment_status ), collapse=",")),    # not needed
+                population = as.character(paste(unique(  population ), collapse=",")),    # not needed
+                otherDisaggregate = as.character(paste(unique(  otherDisaggregate ), collapse=",")),    # not needed
+                coarseDisaggregate = as.character(paste(unique(  coarseDisaggregate ), collapse=",")),    # not needed
+                
                 TARGETS = sum(TARGETS, na.rm = T),
                 Qtr1 = sum(Qtr1, na.rm = T),
                 Qtr2 = sum(Qtr2, na.rm = T),
@@ -243,6 +337,27 @@
                 # categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
                 Sex = as.character(paste(unique(Sex), collapse=",")),
                 modality = as.character(paste(unique(modality), collapse=",")),
+                
+                SNUPrioritization = as.character(paste(unique(  SNUPrioritization ), collapse=",")),    # not needed
+                typeMilitary = as.character(paste(unique(  typeMilitary ), collapse=",")),    # not needed
+                DREAMS = as.character(paste(unique(  DREAMS ), collapse=",")),    # not needed
+                pre_rgnlztn_hq_mech_code = as.character(paste(unique(  pre_rgnlztn_hq_mech_code ), collapse=",")),    # not needed
+                award_number = as.character(paste(unique(  award_number ), collapse=",")),    # not needed
+                CommunityPrioritization = as.character(paste(unique(  CommunityPrioritization ), collapse=",")),    # not needed
+                FacilityPrioritization = as.character(paste(unique(  FacilityPrioritization ), collapse=",")),    # not needed
+                disaggregate = as.character(paste(unique(  disaggregate ), collapse=",")),    # not needed
+                AgeAsEntered = as.character(paste(unique(  AgeAsEntered ), collapse=",")),    # not needed
+                TrendsFine = as.character(paste(unique(  TrendsFine ), collapse=",")),    # not needed
+                TrendsSemiFine = as.character(paste(unique(  TrendsSemiFine ), collapse=",")),    # not needed
+                TrendsCoarse = as.character(paste(unique(  TrendsCoarse ), collapse=",")),    # not needed
+                StatusHIV = as.character(paste(unique(  StatusHIV ), collapse=",")),    # not needed
+                StatusTB = as.character(paste(unique(  StatusTB ), collapse=",")),    # not needed
+                StatusCX = as.character(paste(unique(  StatusCX ), collapse=",")),    # not needed
+                hiv_treatment_status = as.character(paste(unique(  hiv_treatment_status ), collapse=",")),    # not needed
+                population = as.character(paste(unique(  population ), collapse=",")),    # not needed
+                otherDisaggregate = as.character(paste(unique(  otherDisaggregate ), collapse=",")),    # not needed
+                coarseDisaggregate = as.character(paste(unique(  coarseDisaggregate ), collapse=",")),    # not needed
+                
                 TARGETS = sum(TARGETS, na.rm = T),
                 Qtr1 = sum(Qtr1, na.rm = T),
                 Qtr2 = sum(Qtr2, na.rm = T),
@@ -269,6 +384,27 @@
                 # categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
                 Sex = as.character(paste(unique(Sex), collapse=",")),
                 modality = as.character(paste(unique(modality), collapse=",")),
+                
+                SNUPrioritization = as.character(paste(unique(  SNUPrioritization ), collapse=",")),    # not needed
+                typeMilitary = as.character(paste(unique(  typeMilitary ), collapse=",")),    # not needed
+                DREAMS = as.character(paste(unique(  DREAMS ), collapse=",")),    # not needed
+                pre_rgnlztn_hq_mech_code = as.character(paste(unique(  pre_rgnlztn_hq_mech_code ), collapse=",")),    # not needed
+                award_number = as.character(paste(unique(  award_number ), collapse=",")),    # not needed
+                CommunityPrioritization = as.character(paste(unique(  CommunityPrioritization ), collapse=",")),    # not needed
+                FacilityPrioritization = as.character(paste(unique(  FacilityPrioritization ), collapse=",")),    # not needed
+                disaggregate = as.character(paste(unique(  disaggregate ), collapse=",")),    # not needed
+                AgeAsEntered = as.character(paste(unique(  AgeAsEntered ), collapse=",")),    # not needed
+                TrendsFine = as.character(paste(unique(  TrendsFine ), collapse=",")),    # not needed
+                TrendsSemiFine = as.character(paste(unique(  TrendsSemiFine ), collapse=",")),    # not needed
+                TrendsCoarse = as.character(paste(unique(  TrendsCoarse ), collapse=",")),    # not needed
+                StatusHIV = as.character(paste(unique(  StatusHIV ), collapse=",")),    # not needed
+                StatusTB = as.character(paste(unique(  StatusTB ), collapse=",")),    # not needed
+                StatusCX = as.character(paste(unique(  StatusCX ), collapse=",")),    # not needed
+                hiv_treatment_status = as.character(paste(unique(  hiv_treatment_status ), collapse=",")),    # not needed
+                population = as.character(paste(unique(  population ), collapse=",")),    # not needed
+                otherDisaggregate = as.character(paste(unique(  otherDisaggregate ), collapse=",")),    # not needed
+                coarseDisaggregate = as.character(paste(unique(  coarseDisaggregate ), collapse=",")),    # not needed
+                
                 TARGETS = sum(TARGETS, na.rm = T),
                 Qtr1 = sum(Qtr1, na.rm = T),
                 Qtr2 = sum(Qtr2, na.rm = T),
@@ -288,7 +424,7 @@
     sldx <- read_the_SLD(filepathx)
 
     # use this sparingly - huge files that time to process and write!!
-    # write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q3_siteleveldata_UNFILTERED.csv"))
+    # write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q4_siteleveldata_UNFILTERED.csv"))
     
     
     targetindicators <- c(
@@ -318,7 +454,7 @@
       "TX_RET"
     )
 
-    targetyears <- c("2018", "2019")
+    targetyears <- c("2019")
     
     # we just need totalnum for most variables ...
     # only a handful where disaggregate info needed
@@ -340,7 +476,7 @@
       sldx_TotalDenom,
       sldx_HRHCURR_disaggs,
       sldx_HRHSTAFF_disaggs
-    ) %>% 
+    ) 
     
     return(sldcombined)
   }
@@ -358,26 +494,96 @@
   glimpse(sldnest)
   sld <- sldnest %>% unnest()
   
+  sldQ3names <- colnames(sld)
+  sldQ4names <- tolower(sldQ3names)
+  colnames(sld) <- sldQ4names
+  
+  sld <- sld %>% 
+    ungroup() %>% 
+    select(
+      thefilename, ou,
+      orgunituid ,
+      sitename ,
+      region ,
+      regionuid, 
+      operatingunit, 
+      operatingunituid, 
+      countryname ,
+      snu1 ,
+      snu1uid, 
+      psnu ,
+      psnuuid ,
+      snuprioritization ,
+      typemilitary ,
+      dreams ,
+      primepartner, 
+      fundingagency, 
+      mech_code ,
+      mech_name ,
+      pre_rgnlztn_hq_mech_code, 
+      prime_partner_duns ,
+      award_number ,
+      communityuid ,
+      community ,
+      communityprioritization, 
+      facilityuid ,
+      facility ,
+      facilityprioritization, 
+      sitetype ,
+      indicator ,
+      numeratordenom, 
+      indicatortype ,
+      disaggregate ,
+      standardizeddisaggregate, 
+      categoryoptioncomboname ,
+      ageasentered ,
+      trendsfine ,
+      trendssemifine, 
+      trendscoarse ,
+      sex ,
+      statushiv, 
+      statustb ,
+      statuscx ,
+      hiv_treatment_status, 
+      population ,
+      otherdisaggregate, 
+      coarsedisaggregate, 
+      modality ,
+      fiscal_year, 
+      targets ,
+      qtr1 ,
+      qtr2 ,
+      qtr3 ,
+      qtr4 ,
+      cumulative 
+    )
+  
+  sldnest <- sld %>% 
+    group_by(thefilename, ou) %>% 
+    nest()
+  
+  sldnest$data[1]
+  
+  
+  
   # save R file
-  saveRDS(sldnest, file = paste0(datapathout, "Rdata/", "MER_FY19Q3_sitedata.rds"))
+  saveRDS(sldnest, file = paste0(datapathout, "Rdata/", "MER_FY19Q4_sitedata.rds"))
   
-  
+
   
   
   # write csv file data 
   export4hshrt <- function(dfx){
     
-    OUx <- dfx %>% distinct(OperatingUnit) %>%  pull(OperatingUnit)
+    OUx <- dfx %>% distinct(operatingunit) %>%  pull(operatingunit)
     print(paste0("Exporting site data for ", OUx))
 
-    ifelse(is.na(OUx), 
-           print("no data"),
-           write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q3_siteleveldata_", Sys.Date(), ".csv"))
-    )
+    write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q4_siteleveldata_", Sys.Date(), ".csv"))
+    
     
   }
 
-  sldnest %>% purrr::map(sldnest$data, export4hshrt)
+  purrr::map(sldnest$data, export4hshrt)
   
  
   
