@@ -119,7 +119,6 @@
     
     # for Q4, names are all lower case ... unlike Q3
     # map over to old names for code, then change to lower case at the end for use ....
-    MERFY19Q4names <- colnames(theSLD)
 
     Q3names <-   c(
       "orgUnitUID" ,
