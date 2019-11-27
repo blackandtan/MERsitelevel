@@ -449,7 +449,7 @@
   
   ### import FY19 data sets and save as .rds files ---------
   sldnest <- filenest %>%
-    filter(OU %in% c("Tanzania", "Cambodia", "Asia Region", "West Africa Region", "Western Hemisphere Region")) %>%  # test with a few OUs first before running the whole code
+    # filter(OU %in% c("Tanzania", "Cambodia", "Asia Region", "West Africa Region", "Western Hemisphere Region")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
   
   glimpse(sldnest)
@@ -546,7 +546,7 @@
     
   }
 
-  purrr::map(sldnest$data, export4hshrt)
+  # purrr::map(sldnest$data, export4hshrt)
   
  
   
