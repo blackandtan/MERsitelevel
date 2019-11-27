@@ -12,23 +12,13 @@
   library(grid)
   library(magrittr)
   
-  library(RColorBrewer)
-  library(plotly)
-  
-  library(DT)  
-  library(readxl)
-  
-  library(ggridges)
-  library(hrbrthemes)
-
   library(lubridate)
   library(stringr)
   library(forcats)
   library(scales)
   library(tidyverse)
   library(purrr)
-  library(purrrlyr)
-  
+
   dir.create("./output")
 
 
@@ -38,7 +28,7 @@
   ##### change directories and filenames in this block as needed !!!  ---------------------------------------
   
   # file version
-  dsversion <- "MER_Structured_Datasets_SITE_IM_FY17-20_20191115_v1_1_"
+  dsversion <- "MER_Structured_Datasets_SITE_IM_FY17-20_20191115_v1_1_" # FY19 Q4 pre-clean
   
   # download all site level zip files from Panorama into this location:
   datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4_pre-clean/originaldata/sitelevel/"  # FY19Q4 pre-cleaning
@@ -127,11 +117,10 @@
     # spec(theSLD)
     # problems(theSLD)
     
-    # for Q4, names are all lower case ... unlike Q4
+    # for Q4, names are all lower case ... unlike Q3
     # map over to old names for code, then change to lower case at the end for use ....
     MERFY19Q4names <- colnames(theSLD)
-    save(MERFY19Q4names, file = "//cdc.gov/locker/CGH_EHSRB/DataCatalog/Rdata/MERFY19Q4names")
-    
+
     Q3names <-   c(
       "orgUnitUID" ,
       "SiteName" ,
@@ -193,34 +182,6 @@
     return(theSLD)
   }
   
-  inventory_SLD <- function(dfx){
-    
-    OUx <- dfx %>%  pull(theOU)
-    print(paste0("Inventory site data for ", OUx))
-    filepathx <- file.path(dfx$thefilepath)
-    
-    fullSLD <- read_the_SLD(filepathx)
-    summSLD <- fullSLD %>% 
-      summarize(nrecords = length(orgUnitUID),
-                nSNU = length(unique(SNU1Uid)),
-                nPSNU = length(unique(PSNUuid)),
-                nFundingAgencies = length(unique(FundingAgency)),
-                nIP = length(unique(PrimePartner)),
-                nIM = length(unique(mech_code)),
-                nSites = length(unique(orgUnitUID)),
-                nCommunities = length(unique(CommunityUID)),
-                nFacilities = length(unique(FacilityUID)),
-                SNUlist = list(unique(SNU1Uid)),
-                PSNUlist = list(unique(PSNUuid)),
-                FundingAgencylist = list(unique(FundingAgency)),
-                IPlist = list(unique(PrimePartner)),
-                IMlist = list(unique(mech_code)),
-                Sitelist = list(unique(orgUnitUID)),
-                Commlist = list(unique(CommunityUID)),
-                Faclist = list(unique(FacilityUID))) 
-    return(summSLD)
-    
-  }
   
   calculate_TotalNum <- function(dfx){
 
@@ -231,10 +192,10 @@
                FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
                orgUnitUID, SiteName,
                CommunityUID, Community, FacilityUID, Facility, SiteType,
-               Fiscal_Year, indicator) %>%
+               Fiscal_Year, indicator, standardizedDisaggregate) %>%
       summarize(numeratorDenom = as.character(paste(unique(numeratorDenom), collapse=",")),
                 indicatorType = as.character(paste(unique(indicatorType), collapse=",")),
-                standardizedDisaggregate = as.character(paste(unique(standardizedDisaggregate), collapse=",")),
+                # standardizedDisaggregate = as.character(paste(unique(standardizedDisaggregate), collapse=",")),
                 categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
                 Sex = as.character(paste(unique(Sex), collapse=",")),
                 modality = as.character(paste(unique(modality), collapse=",")),
@@ -280,10 +241,10 @@
                FundingAgency, PrimePartner, prime_partner_duns, mech_code, mech_name,
                orgUnitUID, SiteName,
                CommunityUID, Community, FacilityUID, Facility, SiteType,
-               Fiscal_Year, indicator) %>%
+               Fiscal_Year, indicator, standardizedDisaggregate) %>%
       summarize(numeratorDenom = as.character(paste(unique(numeratorDenom), collapse=",")),
                 indicatorType = as.character(paste(unique(indicatorType), collapse=",")),
-                standardizedDisaggregate = as.character(paste(unique(standardizedDisaggregate), collapse=",")),
+                # standardizedDisaggregate = as.character(paste(unique(standardizedDisaggregate), collapse=",")),
                 categoryOptionComboName = as.character(paste(unique(categoryOptionComboName ), collapse=",")),
                 Sex = as.character(paste(unique(Sex), collapse=",")),
                 modality = as.character(paste(unique(modality), collapse=",")),
@@ -323,7 +284,6 @@
   calculate_HRHCURR_disaggs <- function(dfx){
 
     dfx_HRHCURR_disaggs <- dfx %>%
-      # filter(standardizedDisaggregate %in% c("CadreCategory/FinancialSupport", "CadreOU/FinancialSupport")) %>%
       filter(indicator == "HRH_CURR", standardizedDisaggregate != "Total Numerator") %>%
       group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName,
                SNU1, SNU1Uid, PSNU, PSNUuid,
@@ -423,7 +383,8 @@
 
     sldx <- read_the_SLD(filepathx)
 
-    # use this sparingly - huge files that time to process and write!!
+    # write unfiltered file to csv - only use when isolating to one OU for eda!
+    # these are huge files that take time to process and write
     # write_excel_csv(sldx, path = paste0(datapathout,"site_level_data_JB/", OUx, "/", Sys.Date(),"_", OUx, "_FY19Q4_siteleveldata_UNFILTERED.csv"))
     
     
@@ -488,16 +449,18 @@
   
   ### import FY19 data sets and save as .rds files ---------
   sldnest <- filenest %>%
-    # filter(OU %in% c("Haiti")) %>%  # test with a few OUs first before running the whole code
+    filter(OU %in% c("Tanzania", "Cambodia", "Asia Region", "West Africa Region", "Western Hemisphere Region")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
   
   glimpse(sldnest)
   sld <- sldnest %>% unnest()
   
+  # convert back to lower case variable names to match Q4 MER
   sldQ3names <- colnames(sld)
   sldQ4names <- tolower(sldQ3names)
   colnames(sld) <- sldQ4names
   
+  # order variables to match Q4 MER
   sld <- sld %>% 
     ungroup() %>% 
     select(
