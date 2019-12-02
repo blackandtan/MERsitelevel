@@ -414,7 +414,7 @@
       "TX_RET"
     )
 
-    targetyears <- c("2019")
+    targetyears <- c("2018", "2019")
     
     # we just need totalnum for most variables ...
     # only a handful where disaggregate info needed
@@ -451,7 +451,6 @@
     # filter(OU %in% c("Tanzania", "Cambodia", "Asia Region", "West Africa Region", "Western Hemisphere Region")) %>%  # test with a few OUs first before running the whole code
     mutate(data = purrr::map(data, importSiteLevelData))
   
-  glimpse(sldnest)
   sld <- sldnest %>% unnest()
   
   # convert back to lower case variable names to match Q4 MER
@@ -545,7 +544,7 @@
     
   }
 
-  # purrr::map(sldnest$data, export4hshrt)
+  purrr::map(sldnest$data, export4hshrt)
   
  
   
