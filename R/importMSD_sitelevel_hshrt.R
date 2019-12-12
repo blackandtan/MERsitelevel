@@ -184,6 +184,9 @@
   
   calculate_TotalNum <- function(dfx){
 
+    # there are a lot of unnecessary variables included here -- JB requested that they be left in for interface with his PowerBI transformations
+    # the secondary variables (ones that aren't relevant to the analyses) are programmed to collapse into a list for reference 
+    
     dfx_TotalNum <- dfx %>%
       filter(standardizedDisaggregate == "Total Numerator") %>%
       group_by(Region, RegionUID, OperatingUnit, OperatingUnitUID, CountryName,
