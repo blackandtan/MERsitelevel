@@ -397,7 +397,7 @@
       "HRH_CURR_SiteLevel",
       "HRH_CURR_AboveSite",
       "HRH_STAFF",
-      "HRH_STAFF_NAT",
+      "HRH_STAFF_NAT",  # natsubnat data set
       "HRH_CURR_ClinicalCadre",
       "HRH_CURR_ManagementCadre" ,
       "HRH_CURR_ClinicalSupportCadre",
@@ -408,8 +408,8 @@
       "HRH_CURR_PharmacyCadre" ,
       "HRH_PRE",
       "TX_CURR",
-      "TX_CURR_NAT",
-      "TX_CURR_SUBNAT",
+      "TX_CURR_NAT",  # natsubnat data set
+      "TX_CURR_SUBNAT",  # natsubnat data set
       "TX_ML",
       "TX_NEW",
       "TX_NET_NEW",
