@@ -33,7 +33,7 @@
   dsversion <- "MER_Structured_Datasets_Site_IM_FY17-20_20191220_v2_1_" # FY19Q4 post-clean
   
   # download all site level zip files from Panorama into this location:
-  datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4_pre-clean/originaldata/sitelevel/"  # FY19Q4 pre-cleaning
+  datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4/originaldata/sitelevel/"  # FY19Q4 
   datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4/"
 
   
