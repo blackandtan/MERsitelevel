@@ -6,6 +6,7 @@
 #
 #  Revisions
 #  Initial draft ... 2019.10.09
+#  Update to import FY19Q4 post-clean data sets
 
 ### WORKSPACE -----------------------------------------------------------------
   
@@ -28,11 +29,12 @@
   ##### change directories and filenames in this block as needed !!!  ---------------------------------------
   
   # file version
-  dsversion <- "MER_Structured_Datasets_SITE_IM_FY17-20_20191115_v1_1_" # FY19 Q4 pre-clean
+  # dsversion <- "MER_Structured_Datasets_SITE_IM_FY17-20_20191115_v1_1_" # FY19Q4 pre-clean
+  dsversion <- "MER_Structured_Datasets_Site_IM_FY17-20_20191220_v2_1_" # FY19Q4 post-clean
   
   # download all site level zip files from Panorama into this location:
   datapath_originals <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4_pre-clean/originaldata/sitelevel/"  # FY19Q4 pre-cleaning
-  datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4_pre-clean/"
+  datapathout <- "//cdc.gov/locker/CGH_EHSRB/MERdata/FY19Q4/"
 
   
   ##### ---------------------------------------------------------------------------------------
@@ -531,7 +533,7 @@
   
   
   # save R file
-  saveRDS(sldnest, file = paste0(datapathout, "Rdata/", "MER_FY19Q4_sitedata.rds"))
+  saveRDS(sldnest, file = paste0(datapathout, "Rdata/", "MER_FY19Q4postclean_sitedata.rds"))
   
 
   
@@ -542,7 +544,7 @@
     OUx <- dfx %>% distinct(operatingunit) %>%  pull(operatingunit)
     print(paste0("Exporting site data for ", OUx))
 
-    write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q4_siteleveldata_", Sys.Date(), ".csv"))
+    write_excel_csv(dfx, path = paste0(datapathout,"site_level_data_JB/", OUx, "_FY19Q4postclean_siteleveldata_", Sys.Date(), ".csv"))
     
     
   }
